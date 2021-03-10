@@ -1,4 +1,4 @@
-﻿const count = 4096 * 2;
+﻿const count = 4096;
 
 let bd;
 WebAssembly.instantiateStreaming(fetch('ball2d.wasm'), { env: { memory: new WebAssembly.Memory({initial: 1}), STACKTOP: 0, } })
