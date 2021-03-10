@@ -92,13 +92,13 @@ function init()
     const loader = new GLTFLoader();
     loader.setKTX2Loader(ktx2Loader);
 
-    loader.load('tie2.glb', 
+    loader.load('tie.glb', 
     (gltf) =>
     {
         console.log(gltf);
         let model = gltf.scene;
 
-        let tie = model.children[0];// .children[0];
+        let tie = model.children[0].children[2];
         scale = 1. / 8 * tie.scale.x;
         //let tie = model.children[0].children[0].children[0].children[0];// .children[0];
         //scale = 1. / 256 * tie.scale.x;
