@@ -170,6 +170,34 @@ function init()
     };
 
     document.addEventListener('mousemove', onMouseMove);
+
+    window.addEventListener("keydown", 
+        function(event)
+        {
+            if (event.defaultPrevented) {
+                return; // Do nothing if the event was already processed
+            }
+
+            console.log(event);
+            switch (event.key) {
+            case "z":
+                raycaster.setFromCamera(mouse, camera);
+                const intersection = raycaster.intersectObject(fleet);
+                if (intersection.length > 0)
+                {
+                    console.log(intersection[0].instanceId);
+                    const instanceId = intersection[0].instanceId;
+                    bd.move_to(1, bd.bd_get(instanceId), 0, 0);
+                }
+                break;
+
+            default:
+                return; // Quit when this doesn't handle the key event.
+            }
+
+            // Cancel the default action to avoid it being handled twice
+            event.preventDefault();
+        }, true);
 }
 
 function onMouseMove(event)
@@ -247,17 +275,6 @@ function animate()
         fleet.instanceMatrix.needsUpdate = true;
 
         e_count.textContent = fleet.count;
-
-        raycaster.setFromCamera(mouse, camera);
-        const intersection = raycaster.intersectObject(fleet);
-        if (intersection.length > 0) {
-            console.log(intersection[0].instanceId);
-            const instanceId = intersection[0].instanceId;
-
-            fleet.setColorAt(instanceId, color.setHex(Math.random() * 0xffffff));
-            fleet.instanceColor.needsUpdate = true;
-        }
-
     }
 
     render();
