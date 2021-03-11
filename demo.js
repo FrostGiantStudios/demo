@@ -1,4 +1,4 @@
-﻿const count = 1024;
+﻿const count = 1024 * 32;
 
 let bd;
 WebAssembly.instantiateStreaming(fetch('ball2d.wasm'), { env: { memory: new WebAssembly.Memory({initial: 1}), STACKTOP: 0, } })
@@ -43,7 +43,7 @@ function init()
     scene = new THREE.Scene();
     scene.background = new THREE.Color(bkg);
     //scene.fog = new THREE.Fog(bkg, 40, 100);
-    scene.fog = new THREE.FogExp2(bkg, 0.015);
+    scene.fog = new THREE.FogExp2(bkg, 0.011);
 
     const hemiLight = new THREE.HemisphereLight( 0xffffff, 0x444444 );
     hemiLight.position.set( 0, 20, 0 );
@@ -92,14 +92,15 @@ function init()
     const loader = new GLTFLoader();
     loader.setKTX2Loader(ktx2Loader);
 
-    loader.load('tie.glb', 
+    loader.load('knight.glb', 
     (gltf) =>
     {
         console.log(gltf);
         let model = gltf.scene;
 
-        let tie = model.children[0].children[2];
-        scale = 1. / 16 * tie.scale.x;
+        let tie = model.children[0];
+        //let tie = model.children[0].children[0];
+        scale = 1. / 128 * tie.scale.x;
         //let tie = model.children[0].children[0].children[0].children[0];// .children[0];
         //scale = 1. / 256 * tie.scale.x;
 
@@ -121,6 +122,23 @@ function init()
         bd.bd_reset(); 
         fleet.count = 0;
         then_spawn = performance.now();
+    }
+    document.getElementById("spawn").onclick = () =>
+    {
+        var j = fleet.count;
+        var i = j + 512;
+        i = Math.min(i, count);
+
+        while (j < i)
+        {
+            const x = bd.random_float() - 0.5;
+            const y = bd.random_float() - 0.5;
+
+            if (bd.bd_spawn(x * 48, y * 48, 0))
+                fleet.count += 1;
+            j += 1;
+        }
+
     }
 }
 
@@ -156,7 +174,8 @@ function animate()
             if (fleet.count < count)
             {
                 const time = performance.now();
-                if (time > then_spawn)
+                if (false)
+                //if (time > then_spawn)
                 {
                     var j = fleet.count;
                     var i = time - then_spawn + j;
@@ -167,7 +186,7 @@ function animate()
                         const x = bd.random_float() - 0.5;
                         const y = bd.random_float() - 0.5;
 
-                        if (bd.bd_spawn(x * 64, y * 64, 0))
+                        if (bd.bd_spawn(x * 48, y * 48, 0))
                             fleet.count += 1;
                         j += 1;
                     }
