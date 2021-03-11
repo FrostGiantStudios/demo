@@ -1,4 +1,4 @@
-﻿const count = 4096;
+﻿const count = 1024;
 
 let bd;
 WebAssembly.instantiateStreaming(fetch('ball2d.wasm'), { env: { memory: new WebAssembly.Memory({initial: 1}), STACKTOP: 0, } })
@@ -43,7 +43,7 @@ function init()
     scene = new THREE.Scene();
     scene.background = new THREE.Color(bkg);
     //scene.fog = new THREE.Fog(bkg, 40, 100);
-    //scene.fog = new THREE.FogExp2(bkg, 0.007);
+    scene.fog = new THREE.FogExp2(bkg, 0.015);
 
     const hemiLight = new THREE.HemisphereLight( 0xffffff, 0x444444 );
     hemiLight.position.set( 0, 20, 0 );
@@ -99,7 +99,7 @@ function init()
         let model = gltf.scene;
 
         let tie = model.children[0].children[2];
-        scale = 1. / 8 * tie.scale.x;
+        scale = 1. / 16 * tie.scale.x;
         //let tie = model.children[0].children[0].children[0].children[0];// .children[0];
         //scale = 1. / 256 * tie.scale.x;
 
@@ -116,6 +116,12 @@ function init()
     //document.body.appendChild(stats.dom);
 
     document.getElementById("pause").onclick = my_pause;
+    document.getElementById("reset").onclick = function()
+    {
+        bd.bd_reset(); 
+        fleet.count = 0;
+        then_spawn = performance.now();
+    }
 }
 
 function onWindowResize()
@@ -158,12 +164,13 @@ function animate()
 
                     while (j < i)
                     {
-                        if (bd.bd_spawn_random())
+                        const x = bd.random_float() - 0.5;
+                        const y = bd.random_float() - 0.5;
+
+                        if (bd.bd_spawn(x * 64, y * 64, 0))
                             fleet.count += 1;
                         j += 1;
                     }
-                    e_count.textContent = fleet.count;
-
                     then_spawn = time;
                 }
             }
@@ -174,14 +181,14 @@ function animate()
             let m = new THREE.Matrix4();
             for (let i = 0; i < fleet.count; ++i)
             {
-                let px = bd.bd_get_x(i);
-                let py = bd.bd_get_y(i);
-                let p = { x: px * 2, y : 0, z : py * 2 };
+                const body = bd.bd_get(i);
+                let p = { x: bd.bd_x(body), y : 0, z : bd.bd_y(body) };
                 m.compose(p, rot, scl);
                 fleet.setMatrixAt(i, m);
             }
             fleet.instanceMatrix.needsUpdate = true;
         }
+        e_count.textContent = fleet.count;
     }
 
     render();
