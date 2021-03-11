@@ -24,6 +24,9 @@ let camera, scene, renderer, stats;
 let then = performance.now();
 let fleet, scale = 1;
 let pause = false;
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2(1, 1);
+const color = new THREE.Color();
 
 function xyz(a, b, c) { return { x:a, y:b, z:c } };
 
@@ -48,6 +51,14 @@ function init()
     const hemiLight = new THREE.HemisphereLight( 0xffffff, 0x444444 );
     hemiLight.position.set( 0, 20, 0 );
     scene.add( hemiLight );
+
+    const light1 = new THREE.HemisphereLight(0xffffff, 0x000088);
+    light1.position.set(-1, 1.5, 1);
+    scene.add(light1);
+
+    const light2 = new THREE.HemisphereLight(0xffffff, 0x880000, 0.5);
+    light2.position.set(-1, -1.5, -1);
+    scene.add(light2);
 
     const dirLight = new THREE.DirectionalLight( 0xffffff );
     dirLight.position.set( 1, 2, 1 );
@@ -104,8 +115,16 @@ function init()
         //let tie = model.children[0].children[0].children[0].children[0];// .children[0];
         //scale = 1. / 256 * tie.scale.x;
 
+        const geometry = new THREE.IcosahedronGeometry(64, 3);
+        const material = new THREE.MeshPhongMaterial();
+
         fleet = new THREE.InstancedMesh(tie.geometry, tie.material, count);
         fleet.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+        
+        for (let i = 0; i < count; ++i)
+        {
+            fleet.setColorAt(i, color.setHex(Math.random() * 0xffffff));
+        }
         scene.add(fleet);
         fleet.count = 0;
 
@@ -149,6 +168,16 @@ function init()
     {
         bd.move_to(fleet.count, bd.bd_get(0), 0, 0);
     };
+
+    document.addEventListener('mousemove', onMouseMove);
+}
+
+function onMouseMove(event)
+{
+    event.preventDefault();
+
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 }
 
 function onWindowResize()
@@ -183,7 +212,7 @@ function animate()
             {
                 const time = performance.now();
                 if (false)
-                //if (time > then_spawn)
+                    //if (time > then_spawn)
                 {
                     var j = fleet.count;
                     var i = time - then_spawn + j;
@@ -203,19 +232,32 @@ function animate()
             }
 
             bd.bd_tick();
-            let scl = new THREE.Vector3(scale, scale, scale);
-            let rot = new THREE.Quaternion();
-            let m = new THREE.Matrix4();
-            for (let i = 0; i < fleet.count; ++i)
-            {
-                const body = bd.bd_get(i);
-                let p = { x: bd.bd_x(body), y : 0, z : bd.bd_y(body) };
-                m.compose(p, rot, scl);
-                fleet.setMatrixAt(i, m);
-            }
-            fleet.instanceMatrix.needsUpdate = true;
         }
+
+        let scl = new THREE.Vector3(scale, scale, scale);
+        let rot = new THREE.Quaternion();
+        let m = new THREE.Matrix4();
+        for (let i = 0; i < fleet.count; ++i)
+        {
+            const body = bd.bd_get(i);
+            let p = { x: bd.bd_x(body), y : 0, z : bd.bd_y(body) };
+            m.compose(p, rot, scl);
+            fleet.setMatrixAt(i, m);                
+        }
+        fleet.instanceMatrix.needsUpdate = true;
+
         e_count.textContent = fleet.count;
+
+        raycaster.setFromCamera(mouse, camera);
+        const intersection = raycaster.intersectObject(fleet);
+        if (intersection.length > 0) {
+            console.log(intersection[0].instanceId);
+            const instanceId = intersection[0].instanceId;
+
+            fleet.setColorAt(instanceId, color.setHex(Math.random() * 0xffffff));
+            fleet.instanceColor.needsUpdate = true;
+        }
+
     }
 
     render();
