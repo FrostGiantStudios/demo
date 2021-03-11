@@ -38,12 +38,12 @@ function init()
     camera.position.set(-35, 15, 40);
     camera.lookAt(xyz(0, 0, 0));
 
-    const bkg = 0x000000;
+    const bkg = 0x005050;
 
     scene = new THREE.Scene();
     scene.background = new THREE.Color(bkg);
     //scene.fog = new THREE.Fog(bkg, 40, 100);
-    scene.fog = new THREE.FogExp2(bkg, 0.011);
+    scene.fog = new THREE.FogExp2(bkg, 0.008);
 
     const hemiLight = new THREE.HemisphereLight( 0xffffff, 0x444444 );
     hemiLight.position.set( 0, 20, 0 );
@@ -65,7 +65,7 @@ function init()
     //mesh.receiveShadow = true;
     //scene.add(mesh);
 
-    const grid = new THREE.GridHelper(512, 256, 0xffffff, 0x707070);
+    const grid = new THREE.GridHelper(512, 256, 0xffffff, 0x404040);
     grid.material.opacity = 0.2;
     grid.material.transparent = true;
     scene.add(grid);
@@ -100,7 +100,7 @@ function init()
 
         let tie = model.children[0];
         //let tie = model.children[0].children[0];
-        scale = 1. / 128 * tie.scale.x;
+        scale = 1. / 80 * tie.scale.x;
         //let tie = model.children[0].children[0].children[0].children[0];// .children[0];
         //scale = 1. / 256 * tie.scale.x;
 
@@ -111,19 +111,23 @@ function init()
 
     }, undefined, function ( error ) { console.error( error ); } );
 
-    window.addEventListener( 'resize', onWindowResize );
+    window.addEventListener('resize', onWindowResize);
 
     stats = new Stats();
     //document.body.appendChild(stats.dom);
 
-    document.getElementById("pause").onclick = my_pause;
+    document.getElementById("pause").onclick = function()
+    {
+        pause = !pause;
+    };
     document.getElementById("reset").onclick = function()
     {
-        bd.bd_reset(); 
+        bd.bd_reset();
         fleet.count = 0;
         then_spawn = performance.now();
-    }
-    document.getElementById("spawn").onclick = () =>
+    };
+
+    document.getElementById("spawn").onclick = function()
     {
         var j = fleet.count;
         var i = j + 512;
@@ -139,7 +143,12 @@ function init()
             j += 1;
         }
 
-    }
+    };
+
+    document.getElementById("movez").onclick = function()
+    {
+        bd.move_to(fleet.count, bd.bd_get(0), 0, 0);
+    };
 }
 
 function onWindowResize()
@@ -157,7 +166,6 @@ function my_pause()
     else
         pause = true;
 }
-
 
 function animate()
 {
