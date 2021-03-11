@@ -92,7 +92,7 @@ function init()
     const loader = new GLTFLoader();
     loader.setKTX2Loader(ktx2Loader);
 
-    loader.load('knight.glb', 
+    loader.load('knight_lp.glb', 
     (gltf) =>
     {
         console.log(gltf);
