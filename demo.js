@@ -93,7 +93,7 @@ function init()
     controls.screenSpacePanning = false;
     controls.minDistance = 10;
     controls.maxDistance = 200;
-    controls.maxPolarAngle = Math.PI * 6 / 16;
+    controls.maxPolarAngle = Math.PI * 13 / 32;
     controls.update();
 
     var ktx2Loader = new KTX2Loader();
@@ -103,7 +103,7 @@ function init()
     const loader = new GLTFLoader();
     loader.setKTX2Loader(ktx2Loader);
 
-    loader.load('knight_lp.glb', 
+    loader.load('yeti.glb', 
     (gltf) =>
     {
         console.log(gltf);
@@ -111,7 +111,7 @@ function init()
 
         let tie = model.children[0];
         //let tie = model.children[0].children[0];
-        scale = 1. / 80 * tie.scale.x;
+        scale = 1. / 100 * tie.scale.x;
         //let tie = model.children[0].children[0].children[0].children[0];// .children[0];
         //scale = 1. / 256 * tie.scale.x;
 
@@ -127,6 +127,7 @@ function init()
         }
         scene.add(fleet);
         fleet.count = 0;
+        spawn();
 
     }, undefined, function ( error ) { console.error( error ); } );
 
@@ -146,23 +147,7 @@ function init()
         then_spawn = performance.now();
     };
 
-    document.getElementById("spawn").onclick = function()
-    {
-        var j = fleet.count;
-        var i = j + 512;
-        i = Math.min(i, count);
-
-        while (j < i)
-        {
-            const x = bd.random_float() - 0.5;
-            const y = bd.random_float() - 0.5;
-
-            if (bd.bd_spawn(x * 48, y * 48, 0))
-                fleet.count += 1;
-            j += 1;
-        }
-
-    };
+    document.getElementById("spawn").onclick = spawn;
 
     document.getElementById("movez").onclick = function()
     {
@@ -199,6 +184,24 @@ function init()
             event.preventDefault();
         }, true);
 }
+
+function spawn()
+{
+    var j = fleet.count;
+    var i = j + 512;
+    i = Math.min(i, count);
+
+    while (j < i)
+    {
+        const x = bd.random_float() - 0.5;
+        const y = bd.random_float() - 0.5;
+
+        if (bd.bd_spawn(x * 48, y * 48, 0))
+            fleet.count += 1;
+        j += 1;
+    }
+
+};
 
 function onMouseMove(event)
 {
