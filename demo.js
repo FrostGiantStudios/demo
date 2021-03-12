@@ -111,7 +111,7 @@ function init()
 
         let tie = model.children[0];
         //let tie = model.children[0].children[0];
-        scale = 1. / 100 * tie.scale.x;
+        scale = 1. / 120 * tie.scale.x;
         //let tie = model.children[0].children[0].children[0].children[0];// .children[0];
         //scale = 1. / 256 * tie.scale.x;
 
